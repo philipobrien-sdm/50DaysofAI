@@ -1,8 +1,5 @@
 # Day 1: Tensor Mechanics \& Gradient Descent from Scratch
 
-> \\\\\\\*\\\\\\\*Module 1:\\\\\\\*\\\\\\\* Modern ML Foundations \\\\\\\& Tabular Intelligence  
-> \\\\\\\*\\\\\\\*Series:\\\\\\\*\\\\\\\* 50 Days of AI Project
-
 \---
 
 ## 1\. Theory: The Engine Behind Modern ML
@@ -121,7 +118,7 @@ for epoch in range(10):
     w.data -= lr \\\\\\\* w.grad
 
     print(f"Epoch {epoch+1:2d} | Loss: {loss.data:.4f} | Weight: {w.data\\\\\\\[0]\\\\\\\[0]:.4f}")
-
+'''
 
 ## 3. Reflection: The Scalability Bottleneck
 
