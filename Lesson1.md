@@ -25,67 +25,67 @@ class Tensor:
     """
     A minimal autograd Tensor implementation wrapped around NumPy arrays.
     """
-    def \\\\\\\_\\\\\\\_init\\\\\\\_\\\\\\\_(self, data, requires\\\\\\\_grad=False, \\\\\\\_children=()):
+    def __init__(self, data, requires_grad=False, _children=()):
         self.data = np.array(data, dtype=np.float32)
-        self.grad = np.zeros\\\\\\\_like(self.data, dtype=np.float32) if requires\\\\\\\_grad else None
-        self.requires\\\\\\\_grad = requires\\\\\\\_grad
+        self.grad = np.zeros_like(self.data, dtype=np.float32) if requires_grad else None
+        self.requires_grad = requires_grad
         
         # Dynamic computational graph tracking
-        self.\\\\\\\_backward = lambda: None
-        self.\\\\\\\_prev = set(\\\\\\\_children)
+        self._backward = lambda: None
+        self._prev = set(_children)
 
-    def \\\\\\\_\\\\\\\_matmul\\\\\\\_\\\\\\\_(self, other):
+    def __matmul__(self, other):
         """Matrix Multiplication: self @ other"""
         other = other if isinstance(other, Tensor) else Tensor(other)
-        out = Tensor(self.data @ other.data, \\\\\\\_children=(self, other))
+        out = Tensor(self.data @ other.data, _children=(self, other))
 
-        def \\\\\\\_backward():
-            if self.requires\\\\\\\_grad:
+        def _backward():
+            if self.requires_grad:
                 self.grad += out.grad @ other.data.T
-            if other.requires\\\\\\\_grad:
+            if other.requires_grad:
                 other.grad += self.data.T @ out.grad
 
-        out.\\\\\\\_backward = \\\\\\\_backward
-        out.requires\\\\\\\_grad = self.requires\\\\\\\_grad or other.requires\\\\\\\_grad
+        out._backward = _backward
+        out.requires_grad = self.requires_grad or other.requires_grad
         return out
 
-    def mean\\\\\\\_squared\\\\\\\_error(self, target):
+    def mean_squared_error(self, target):
         """Mean Squared Error Loss: mean((self - target)^2)"""
         diff = self.data - target.data
-        loss\\\\\\\_val = np.mean(diff \\\\\\\*\\\\\\\* 2)
-        out = Tensor(loss\\\\\\\_val, \\\\\\\_children=(self, target))
+        loss_val = np.mean(diff ** 2)
+        out = Tensor(loss_val, _children=(self, target))
 
-        def \\\\\\\_backward():
-            if self.requires\\\\\\\_grad:
+        def _backward():
+            if self.requires_grad:
                 N = self.data.size
-                self.grad += (2.0 / N) \\\\\\\* diff \\\\\\\* out.grad
+                self.grad += (2.0 / N) * diff * out.grad
 
-        out.\\\\\\\_backward = \\\\\\\_backward
-        out.requires\\\\\\\_grad = self.requires\\\\\\\_grad or target.requires\\\\\\\_grad
+        out._backward = _backward
+        out.requires_grad = self.requires_grad or target.requires_grad
         return out
 
     def backward(self):
         """Topologically sorts nodes and runs reverse-mode backpropagation."""
-        topo = \\\\\\\[]
+        topo = []
         visited = set()
 
-        def build\\\\\\\_topo(v):
+        def build_topo(v):
             if v not in visited:
                 visited.add(v)
-                for child in v.\\\\\\\_prev:
-                    build\\\\\\\_topo(child)
+                for child in v._prev:
+                    build_topo(child)
                 topo.append(v)
 
-        build\\\\\\\_topo(self)
+        build_topo(self)
 
         # Seed the output node gradient
-        self.grad = np.ones\\\\\\\_like(self.data, dtype=np.float32)
+        self.grad = np.ones_like(self.data, dtype=np.float32)
 
         # Backpropagate in topological order
         for node in reversed(topo):
-            node.\\\\\\\_backward()
+            node._backward()
 
-    def zero\\\\\\\_grad(self):
+    def zero_grad(self):
         """Resets accumulated gradients."""
         if self.grad is not None:
             self.grad.fill(0.0)
@@ -94,28 +94,28 @@ class Tensor:
 # --- Execution Example ---
 
 # 1. Dataset setup (Target relationship: y = 2x)
-X = Tensor(\\\\\\\[\\\\\\\[1.0], \\\\\\\[2.0], \\\\\\\[3.0]], requires\\\\\\\_grad=False)
-y = Tensor(\\\\\\\[\\\\\\\[2.0], \\\\\\\[4.0], \\\\\\\[6.0]], requires\\\\\\\_grad=False)
+X = Tensor([[1.0], [2.0], [3.0]], requires_grad=False)
+y = Tensor([[2.0], [4.0], [6.0]], requires_grad=False)
 
 # 2. Initial Weight
-w = Tensor(\\\\\\\[\\\\\\\[0.1]], requires\\\\\\\_grad=True)
+w = Tensor([[0.1]], requires_grad=True)
 
 # 3. Training Step Loop
 lr = 0.05
 for epoch in range(10):
-    w.zero\\\\\\\_grad()
+    w.zero_grad()
 
     # Forward Pass
     pred = X @ w
-    loss = pred.mean\\\\\\\_squared\\\\\\\_error(y)
+    loss = pred.mean_squared_error(y)
 
     # Automatic Backward Pass
     loss.backward()
 
     # Gradient Descent Weight Update
-    w.data -= lr \\\\\\\* w.grad
+    w.data -= lr * w.grad
 
-    print(f"Epoch {epoch+1:2d} | Loss: {loss.data:.4f} | Weight: {w.data\\\\\\\[0]\\\\\\\[0]:.4f}")
+    print(f"Epoch {epoch+1:2d} | Loss: {loss.data:.4f} | Weight: {w.data[0][0]:.4f}")
 ```
 
 ## 3. Reflection: The Scalability Bottleneck
