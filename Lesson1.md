@@ -1,7 +1,5 @@
 # Day 1: Tensor Mechanics \& Gradient Descent from Scratch
 
-\---
-
 ## 1\. Theory: The Engine Behind Modern ML
 
 Deep learning models don't just "learn"—they adjust their weights based on how wrong their predictions were. This process relies on four core concepts:
@@ -118,7 +116,7 @@ for epoch in range(10):
     w.data -= lr \\\\\\\* w.grad
 
     print(f"Epoch {epoch+1:2d} | Loss: {loss.data:.4f} | Weight: {w.data\\\\\\\[0]\\\\\\\[0]:.4f}")
-'''
+```
 
 ## 3. Reflection: The Scalability Bottleneck
 
